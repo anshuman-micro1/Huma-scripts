@@ -316,7 +316,7 @@ deploy_obs_profile() {
         '' \
         '[SimpleOutput]' \
         "FilePath=${MOVIES_PATH}" \
-        'RecFormat2=mp4' \
+        'RecFormat2=mov' \
         'VBitrate=2500' \
         'ABitrate=160' \
         'Preset=veryfast' \
