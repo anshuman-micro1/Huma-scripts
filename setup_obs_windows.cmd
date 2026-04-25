@@ -139,7 +139,7 @@ if not exist "%PROFILE_DIR%" mkdir "%PROFILE_DIR%"
 set "VIDEOS_PATH=%USERPROFILE%\Videos"
 set "VIDEOS_FWD=%VIDEOS_PATH:\=/%"
 
-powershell -Command "$v='%VIDEOS_FWD%'; '[Output]','Mode=Simple','','[SimpleOutput]',('FilePath='+$v),'RecFormat2=mkv','VBitrate=2500','ABitrate=160','Preset=veryfast','NVENCPreset2=p5','RecQuality=Stream','RecEncoder=x264','StreamAudioEncoder=aac','RecAudioEncoder=aac','RecTracks=1','StreamEncoder=x264','','[Video]','BaseCX=1920','BaseCY=1080','OutputCX=1920','OutputCY=1080','FPSType=0','FPSCommon=30','FPSInt=30','FPSNum=30','FPSDen=1' | Set-Content -Encoding UTF8 '%PROFILE_DIR%\basic.ini'"
+powershell -Command "$v='%VIDEOS_FWD%'; '[Output]','Mode=Simple','','[SimpleOutput]',('FilePath='+$v),'RecFormat2=mov','VBitrate=2500','ABitrate=160','Preset=veryfast','NVENCPreset2=p5','RecQuality=Stream','RecEncoder=x264','StreamAudioEncoder=aac','RecAudioEncoder=aac','RecTracks=1','StreamEncoder=x264','','[Video]','BaseCX=1920','BaseCY=1080','OutputCX=1920','OutputCY=1080','FPSType=0','FPSCommon=30','FPSInt=30','FPSNum=30','FPSDen=1' | Set-Content -Encoding UTF8 '%PROFILE_DIR%\basic.ini'"
 
 echo [SUCCESS] Profile written
 
