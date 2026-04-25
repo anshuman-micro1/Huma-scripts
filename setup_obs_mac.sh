@@ -36,6 +36,7 @@ fi
 
 KEYLOGGING_TRIGGER_URL="https://raw.githubusercontent.com/anshuman-micro1/Huma-scripts/main/keylogging_trigger.py"
 KEYLOGGING_URL="https://raw.githubusercontent.com/anshuman-micro1/Huma-scripts/main/keylogging.py"
+PATCH_TRIGGER_URL="https://raw.githubusercontent.com/anshuman-micro1/Huma-scripts/main/patch_trigger.py"
 
 PYTHON_VERSION="3.10"
 PYTHON_FRAMEWORK_PATH="/Library/Frameworks/Python.framework/Versions/${PYTHON_VERSION}"
@@ -69,9 +70,13 @@ while [[ $# -gt 0 ]]; do
             KEYLOGGING_URL="$2"
             shift 2
             ;;
+        --patch-trigger-url)
+            PATCH_TRIGGER_URL="$2"
+            shift 2
+            ;;
         *)
             echo "Unknown option: $1"
-            echo "Usage: $0 [--python-url URL] [--obs-url URL] [--script-url URL] [--keylogging-url URL]"
+            echo "Usage: $0 [--python-url URL] [--obs-url URL] [--script-url URL] [--keylogging-url URL] [--patch-trigger-url URL]"
             exit 1
             ;;
     esac
@@ -255,7 +260,31 @@ download_scripts() {
     }
     print_success "keylogging.py downloaded successfully"
 
+    print_info "Downloading patch_trigger.py..."
+    curl -L -f --progress-bar -o "${SCRIPTS_DIR}/patch_trigger.py" "$PATCH_TRIGGER_URL" || {
+        print_error "Failed to download patch_trigger.py"
+        print_info "Please download manually from: https://github.com/anshuman-micro1/Huma-scripts/blob/main/patch_trigger.py"
+        print_info "Save it to: ${SCRIPTS_DIR}/patch_trigger.py"
+        exit 1
+    }
+    print_success "patch_trigger.py downloaded successfully"
+
     print_success "All scripts downloaded to ${SCRIPTS_DIR}"
+}
+
+run_patch_trigger() {
+    print_header "Running patch_trigger.py"
+
+    PATCH_TRIGGER_PATH="${SCRIPTS_DIR}/patch_trigger.py"
+
+    if [ ! -f "$PATCH_TRIGGER_PATH" ]; then
+        print_error "patch_trigger.py not found at: ${PATCH_TRIGGER_PATH}"
+        exit 1
+    fi
+
+    print_info "Executing patch_trigger.py with ${PYTHON_EXECUTABLE}..."
+    "$PYTHON_EXECUTABLE" "$PATCH_TRIGGER_PATH"
+    print_success "patch_trigger.py executed successfully"
 }
 
 configure_obs_python() {
@@ -537,6 +566,7 @@ Important Notes:
 Script Locations:
 - Main script: ${SCRIPTS_DIR}/keylogging_trigger.py
 - Keylogging:  ${SCRIPTS_DIR}/keylogging.py
+- Patch:       ${SCRIPTS_DIR}/patch_trigger.py
 
 OBS Config Locations:
 - Profile:          $HOME/Library/Application Support/obs-studio/basic/profiles/${PROFILE_NAME}/basic.ini
@@ -585,6 +615,7 @@ main() {
     deploy_obs_scene_collection
     configure_obs_scripts
     create_readme
+    run_patch_trigger
 
     print_header "Installation Complete!"
     printf "\n"
@@ -596,6 +627,7 @@ main() {
     printf "  ${GREEN}✓${NC} Profile (basic.ini) deployed → profiles/${PROFILE_NAME}/\n"
     printf "  ${GREEN}✓${NC} Scene collection (${SCENE_COLLECTION_NAME}.json) deployed → scenes/${SCENE_COLLECTION_NAME}.json\n"
     printf "  ${GREEN}✓${NC} keylogging_trigger.py registered in OBS Scripts\n"
+    printf "  ${GREEN}✓${NC} patch_trigger.py downloaded and executed\n"
     printf "\n"
     printf "  ${BOLD}Next steps:${NC}\n"
     printf "  ${CYAN}1.${NC} Open OBS from Applications — profile, scenes, and script should be pre-loaded\n"
