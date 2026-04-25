@@ -353,7 +353,7 @@ deploy_obs_profile() {
     fi
     
     printf "  ${YELLOW}?${NC} Do you want to force the OBS canvas and output resolution to ${CANVAS_W}x${CANVAS_H}? (y/n): "
-    read -r FORCE_RES
+    read -r FORCE_RES < /dev/tty
 
     if [[ "$FORCE_RES" =~ ^[Yy]$ ]]; then
         sed -i '' \
