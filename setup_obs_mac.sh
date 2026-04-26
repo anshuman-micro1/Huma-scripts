@@ -237,6 +237,29 @@ install_obs() {
     rm -f "$OBS_DMG"
 }
 
+install_python_packages() {
+    print_header "Installing Required Python Packages"
+
+    PIP_EXECUTABLE="${PYTHON_FRAMEWORK_PATH}/bin/pip3.10"
+
+    # Ensure pip is available
+    if [ ! -f "$PIP_EXECUTABLE" ]; then
+        print_info "pip not found at ${PIP_EXECUTABLE}, bootstrapping via ensurepip..."
+        "$PYTHON_EXECUTABLE" -m ensurepip --upgrade
+        "$PYTHON_EXECUTABLE" -m pip install --upgrade pip --quiet
+    fi
+
+    print_info "Installing pynput..."
+    "$PYTHON_EXECUTABLE" -m pip install --upgrade pynput --quiet
+
+    if "$PYTHON_EXECUTABLE" -c "import pynput" 2>/dev/null; then
+        print_success "pynput installed successfully"
+    else
+        print_error "pynput installation failed"
+        exit 1
+    fi
+}
+
 download_scripts() {
     print_header "Downloading Python Scripts"
 
@@ -608,6 +631,7 @@ main() {
     while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 
     install_python
+    install_python_packages
     install_obs
     download_scripts
     configure_obs_python
@@ -621,6 +645,7 @@ main() {
     printf "\n"
     printf "  ${BOLD}Summary:${NC}\n"
     printf "  ${GREEN}✓${NC} Python ${PYTHON_VERSION} installed\n"
+    printf "  ${GREEN}✓${NC} pynput installed for Python ${PYTHON_VERSION}\n"
     printf "  ${GREEN}✓${NC} OBS Studio installed\n"
     printf "  ${GREEN}✓${NC} Python scripts downloaded\n"
     printf "  ${GREEN}✓${NC} OBS Python path configured\n"
