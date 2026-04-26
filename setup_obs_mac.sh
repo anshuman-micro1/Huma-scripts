@@ -260,6 +260,74 @@ install_python_packages() {
     fi
 }
 
+request_accessibility_permission() {
+    print_header "macOS Accessibility Permission"
+
+    # Quick check: try running a pynput listener and see if macOS rejects it
+    TRUST_CHECK=$("$PYTHON_EXECUTABLE" - 2>&1 <<'PYEOF'
+from pynput import keyboard
+import sys, threading
+trusted = True
+def on_press(k):
+    pass
+try:
+    l = keyboard.Listener(on_press=on_press)
+    l.start()
+    import time; time.sleep(0.3)
+    l.stop()
+    l.join(timeout=1)
+except Exception:
+    pass
+# pynput prints the warning to stderr; we rely on the output captured above
+PYEOF
+)
+
+    if echo "$TRUST_CHECK" | grep -q "not trusted"; then
+        printf "\n"
+        printf "  ${RED}${BOLD}  !! ACTION REQUIRED: Accessibility Permission !!${NC}\n"
+        printf "\n"
+        printf "  ${YELLOW}pynput cannot monitor keyboard/mouse because Python 3.10\n"
+        printf "  has not been granted Accessibility access.${NC}\n"
+        printf "\n"
+        printf "  ${BOLD}Steps to fix:${NC}\n"
+        printf "  ${CYAN}1.${NC} The Accessibility settings pane will open now.\n"
+        printf "  ${CYAN}2.${NC} Click the ${BOLD}+${NC} button.\n"
+        printf "  ${CYAN}3.${NC} Navigate to and select:\n"
+        printf "       ${BOLD}${PYTHON_EXECUTABLE}${NC}\n"
+        printf "  ${CYAN}4.${NC} Make sure the checkbox next to it is ${BOLD}enabled${NC}.\n"
+        printf "  ${CYAN}5.${NC} Also add ${BOLD}OBS.app${NC} (${OBS_APP_PATH}) while you are there.\n"
+        printf "\n"
+
+        # Open Accessibility pane
+        open "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility" 2>/dev/null || \
+        open "x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension?Privacy_Accessibility" 2>/dev/null || \
+        open "/System/Library/PreferencePanes/Security.prefPane" 2>/dev/null || true
+
+        printf "  ${DIM}──────────────────────────────────────────────${NC}\n"
+        printf "  Press ${BOLD}Enter${NC} once you have granted Accessibility access...\n"
+        read -r < /dev/tty
+
+        # Re-verify
+        TRUST_RECHECK=$("$PYTHON_EXECUTABLE" - 2>&1 <<'PYEOF'
+from pynput import keyboard
+import time
+l = keyboard.Listener(on_press=lambda k: None)
+l.start(); time.sleep(0.3); l.stop(); l.join(timeout=1)
+PYEOF
+)
+        if echo "$TRUST_RECHECK" | grep -q "not trusted"; then
+            print_error "Accessibility permission still not granted."
+            printf "  ${YELLOW}→${NC} The script will continue, but keyboard/mouse recording\n"
+            printf "    will NOT work until you add ${BOLD}${PYTHON_EXECUTABLE}${NC}\n"
+            printf "    to System Settings → Privacy & Security → Accessibility.\n"
+        else
+            print_success "Accessibility permission confirmed"
+        fi
+    else
+        print_success "Accessibility permission already granted"
+    fi
+}
+
 download_scripts() {
     print_header "Downloading Python Scripts"
 
@@ -579,6 +647,12 @@ Next Steps:
 7. Restart OBS if the script or scene collection does not appear
 
 Important Notes:
+- Accessibility permission is REQUIRED for keyboard/mouse recording.
+  If you see "This process is not trusted!", go to:
+    System Settings → Privacy & Security → Accessibility
+  and add: ${PYTHON_EXECUTABLE}
+  Also add OBS.app (${OBS_APP_PATH}) while you are there.
+
 - keylogging.py must stay in ${SCRIPTS_DIR} alongside keylogging_trigger.py
 - Only keylogging_trigger.py is loaded into OBS directly
 - If you have other Python versions installed, OBS might default to them.
@@ -632,6 +706,7 @@ main() {
 
     install_python
     install_python_packages
+    request_accessibility_permission
     install_obs
     download_scripts
     configure_obs_python
@@ -646,6 +721,7 @@ main() {
     printf "  ${BOLD}Summary:${NC}\n"
     printf "  ${GREEN}✓${NC} Python ${PYTHON_VERSION} installed\n"
     printf "  ${GREEN}✓${NC} pynput installed for Python ${PYTHON_VERSION}\n"
+    printf "  ${GREEN}✓${NC} Accessibility permission requested\n"
     printf "  ${GREEN}✓${NC} OBS Studio installed\n"
     printf "  ${GREEN}✓${NC} Python scripts downloaded\n"
     printf "  ${GREEN}✓${NC} OBS Python path configured\n"
