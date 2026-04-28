@@ -15,9 +15,12 @@ if platform.system() == "Windows":
     PYTHON_EXE  = os.path.join(os.environ.get("LOCALAPPDATA", ""),
                                "Programs", "Python", "Python310", "python.exe")
     OUTPUT_DIR  = os.path.expanduser("~/Videos")
-else:
+elif platform.system() == "Darwin":
     PYTHON_EXE  = "/Library/Frameworks/Python.framework/Versions/3.10/bin/python3.10"
     OUTPUT_DIR  = os.path.expanduser("~/Movies")
+else:  # Linux
+    PYTHON_EXE  = "/usr/bin/python3"
+    OUTPUT_DIR  = os.path.expanduser("~/Videos")
 
 # Always use forward slashes when embedding paths into Python source code.
 # Backslashes on Windows (e.g. C:\Users\...) would cause SyntaxError
