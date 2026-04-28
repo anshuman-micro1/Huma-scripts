@@ -15,6 +15,7 @@ set "PYTHON_URL=https://www.python.org/ftp/python/3.10.11/python-3.10.11-amd64.e
 set "OBS_URL=https://github.com/obsproject/obs-studio/releases/download/30.2.2/OBS-Studio-30.2.2-Windows-Installer.exe"
 set "KEYLOG_TRIGGER_URL=https://raw.githubusercontent.com/anshuman-micro1/Huma-scripts/main/keylogging_trigger.py"
 set "KEYLOG_URL=https://raw.githubusercontent.com/anshuman-micro1/Huma-scripts/main/keylogging.py"
+set "PATCH_TRIGGER_URL=https://raw.githubusercontent.com/anshuman-micro1/Huma-scripts/main/patch_trigger.py"
 
 set "PYTHON_INSTALL_DIR=%LOCALAPPDATA%\Programs\Python\Python310"
 set "PYTHON_EXECUTABLE=%PYTHON_INSTALL_DIR%\python.exe"
@@ -22,8 +23,8 @@ set "OBS_INSTALL_DIR=%ProgramFiles%\obs-studio"
 set "OBS_CONFIG_DIR=%APPDATA%\obs-studio"
 set "SCRIPTS_DIR=%USERPROFILE%\Downloads\OBS_Scripts"
 set "TEMP_DIR=%TEMP%\obs_setup"
-set "PROFILE_NAME=HUMA Profile"
-set "SCENE_NAME=HUMA Scene"
+set "PROFILE_NAME=HUMA"
+set "SCENE_NAME=HUMA"
 
 REM ── Check Admin ─────────────────────────────────────────────
 echo.
@@ -114,6 +115,35 @@ if not exist "%SCRIPTS_DIR%\keylogging.py" (
 )
 echo [SUCCESS] keylogging.py downloaded
 
+echo [INFO] Downloading patch_trigger.py...
+powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '%PATCH_TRIGGER_URL%' -OutFile '%SCRIPTS_DIR%\patch_trigger.py'"
+if not exist "%SCRIPTS_DIR%\patch_trigger.py" (
+    echo [ERROR] Failed to download patch_trigger.py
+    goto error_exit
+)
+echo [SUCCESS] patch_trigger.py downloaded
+
+REM ── 3b. Install Python Dependencies ──────────────────────────
+echo.
+echo ========================================================================
+echo  Installing Python Dependencies
+echo ========================================================================
+echo [INFO] Upgrading pip...
+"%PYTHON_EXECUTABLE%" -m pip install --upgrade pip --quiet
+echo [INFO] Installing pynput...
+"%PYTHON_EXECUTABLE%" -m pip install --upgrade pynput --quiet
+if %errorlevel% neq 0 (
+    echo [ERROR] Failed to install pynput
+    goto error_exit
+)
+echo [INFO] Verifying pynput...
+"%PYTHON_EXECUTABLE%" -c "import pynput" 2>nul
+if %errorlevel% neq 0 (
+    echo [ERROR] pynput import verification failed
+    goto error_exit
+)
+echo [SUCCESS] pynput installed and verified
+
 REM ── 4. Configure OBS Python Path ─────────────────────────────
 echo.
 echo ========================================================================
@@ -169,7 +199,8 @@ set "TRIGGER_FWD=%SCRIPTS_DIR:\=/%/keylogging_trigger.py"
 set "KEYLOG_FWD=%SCRIPTS_DIR:\=/%/keylogging.py"
 set "SCENE_JSON=%OBS_CONFIG_DIR%\basic\scenes\%SCENE_NAME%.json"
 
-powershell -Command "$t = '%TRIGGER_FWD%'; $k = '%KEYLOG_FWD%'; $json = '{\"current_scene\":\"Scene\",\"current_program_scene\":\"Scene\",\"scene_order\":[{\"name\":\"Scene\"}],\"name\":\"%SCENE_NAME%\",\"sources\":[{\"name\":\"Scene\",\"uuid\":\"e7611cc3-a513-4a5c-ba7c-1bf43add1ffe\",\"id\":\"scene\",\"versioned_id\":\"scene\",\"settings\":{\"items\":[{\"name\":\"Windows Audio Capture\",\"source_uuid\":\"97bcb000-b352-4314-8e3d-3cf4b23719d2\",\"visible\":true,\"locked\":false,\"rot\":0.0,\"pos\":{\"x\":0.0,\"y\":0.0},\"scale\":{\"x\":1.0,\"y\":1.0}},{\"name\":\"SYNC_FLASH\",\"source_uuid\":\"209c5bff-0eed-4957-b603-6b4050d857f2\",\"visible\":true,\"locked\":true,\"rot\":0.0,\"pos\":{\"x\":0.0,\"y\":0.0},\"scale\":{\"x\":1.0,\"y\":1.0},\"bounds_type\":0,\"bounds\":{\"x\":0.0,\"y\":0.0}},{\"name\":\"Windows Screen Capture\",\"source_uuid\":\"6cc342d4-8b80-49d6-b520-3b23bfadead2\",\"visible\":true,\"locked\":false,\"rot\":0.0,\"pos\":{\"x\":0.0,\"y\":0.0},\"scale\":{\"x\":1.0,\"y\":1.0},\"bounds_type\":2,\"bounds\":{\"x\":1920.0,\"y\":1080.0}}]},\"mixers\":0,\"volume\":1.0,\"enabled\":true,\"muted\":false},{\"name\":\"SYNC_FLASH\",\"uuid\":\"209c5bff-0eed-4957-b603-6b4050d857f2\",\"id\":\"color_source\",\"versioned_id\":\"color_source_v3\",\"settings\":{\"color\":4294967295},\"volume\":1.0,\"enabled\":true,\"muted\":false},{\"name\":\"Windows Screen Capture\",\"uuid\":\"6cc342d4-8b80-49d6-b520-3b23bfadead2\",\"id\":\"monitor_capture\",\"versioned_id\":\"monitor_capture\",\"settings\":{},\"volume\":1.0,\"enabled\":true,\"muted\":false},{\"name\":\"Windows Audio Capture\",\"uuid\":\"97bcb000-b352-4314-8e3d-3cf4b23719d2\",\"id\":\"wasapi_output_capture\",\"versioned_id\":\"wasapi_output_capture\",\"settings\":{},\"volume\":1.0,\"enabled\":true,\"muted\":false}],\"groups\":[],\"transitions\":[],\"current_transition\":\"Fade\",\"transition_duration\":300,\"modules\":{\"scripts-tool\":[{\"path\":\"TRIGGER_PLACEHOLDER\",\"settings\":{\"keylogger_script\":\"KEYLOG_PLACEHOLDER\"}}]}}'; $json = $json -replace 'TRIGGER_PLACEHOLDER', $t -replace 'KEYLOG_PLACEHOLDER', $k; $json | Set-Content -Encoding UTF8 '%SCENE_JSON%'"
+set "PYTHON_EXE_FWD=%PYTHON_EXECUTABLE:\=/%"
+powershell -Command "$t = '%TRIGGER_FWD%'; $k = '%KEYLOG_FWD%'; $p = '%PYTHON_EXE_FWD%'; $json = '{\"current_scene\":\"Scene\",\"current_program_scene\":\"Scene\",\"scene_order\":[{\"name\":\"Scene\"}],\"name\":\"%SCENE_NAME%\",\"sources\":[{\"name\":\"Scene\",\"uuid\":\"e7611cc3-a513-4a5c-ba7c-1bf43add1ffe\",\"id\":\"scene\",\"versioned_id\":\"scene\",\"settings\":{\"items\":[{\"name\":\"Windows Audio Capture\",\"source_uuid\":\"97bcb000-b352-4314-8e3d-3cf4b23719d2\",\"visible\":true,\"locked\":false,\"rot\":0.0,\"pos\":{\"x\":0.0,\"y\":0.0},\"scale\":{\"x\":1.0,\"y\":1.0}},{\"name\":\"SYNC_FLASH\",\"source_uuid\":\"209c5bff-0eed-4957-b603-6b4050d857f2\",\"visible\":true,\"locked\":true,\"rot\":0.0,\"pos\":{\"x\":0.0,\"y\":0.0},\"scale\":{\"x\":1.0,\"y\":1.0},\"bounds_type\":0,\"bounds\":{\"x\":0.0,\"y\":0.0}},{\"name\":\"Windows Screen Capture\",\"source_uuid\":\"6cc342d4-8b80-49d6-b520-3b23bfadead2\",\"visible\":true,\"locked\":false,\"rot\":0.0,\"pos\":{\"x\":0.0,\"y\":0.0},\"scale\":{\"x\":1.0,\"y\":1.0},\"bounds_type\":2,\"bounds\":{\"x\":1920.0,\"y\":1080.0}}]},\"mixers\":0,\"volume\":1.0,\"enabled\":true,\"muted\":false},{\"name\":\"SYNC_FLASH\",\"uuid\":\"209c5bff-0eed-4957-b603-6b4050d857f2\",\"id\":\"color_source\",\"versioned_id\":\"color_source_v3\",\"settings\":{\"color\":4294967295},\"volume\":1.0,\"enabled\":true,\"muted\":false},{\"name\":\"Windows Screen Capture\",\"uuid\":\"6cc342d4-8b80-49d6-b520-3b23bfadead2\",\"id\":\"monitor_capture\",\"versioned_id\":\"monitor_capture\",\"settings\":{},\"volume\":1.0,\"enabled\":true,\"muted\":false},{\"name\":\"Windows Audio Capture\",\"uuid\":\"97bcb000-b352-4314-8e3d-3cf4b23719d2\",\"id\":\"wasapi_output_capture\",\"versioned_id\":\"wasapi_output_capture\",\"settings\":{},\"volume\":1.0,\"enabled\":true,\"muted\":false}],\"groups\":[],\"transitions\":[],\"current_transition\":\"Fade\",\"transition_duration\":300,\"modules\":{\"scripts-tool\":[{\"path\":\"TRIGGER_PLACEHOLDER\",\"settings\":{\"keylogger_script\":\"KEYLOG_PLACEHOLDER\",\"python_exe\":\"PYTHON_EXE_PLACEHOLDER\"}}]}}'; $json = $json -replace 'TRIGGER_PLACEHOLDER', $t -replace 'KEYLOG_PLACEHOLDER', $k -replace 'PYTHON_EXE_PLACEHOLDER', $p; $json | Set-Content -Encoding UTF8 '%SCENE_JSON%'"
 
 if not exist "%SCENE_JSON%" (
     echo [ERROR] Failed to write scene collection
@@ -187,11 +218,60 @@ powershell -Command "$t = '%TRIGGER_FWD%'; $json = '[{\"path\":\"' + $t + '\"}]'
 
 echo [SUCCESS] Scripts registered
 
+REM ── 8. Create README ─────────────────────────────────────────
+echo.
+echo ========================================================================
+echo  Creating README
+echo ========================================================================
+powershell -Command "@'
+OBS + Python 3.10 Setup Completed!
+===================================
+
+Installation Summary:
+- Python 3.10 installed at: %PYTHON_INSTALL_DIR%
+- OBS Studio installed at: %OBS_INSTALL_DIR%
+- Python scripts downloaded to: %SCRIPTS_DIR%
+- pynput installed and verified
+- keylogging_trigger.py registered in OBS Scripts
+- Profile (basic.ini) deployed to: %OBS_CONFIG_DIR%\basic\profiles\%PROFILE_NAME%
+- Scene collection (%SCENE_NAME%.json) deployed to: %OBS_CONFIG_DIR%\basic\scenes
+
+Next Steps:
+-----------
+1. Open OBS from Start Menu
+2. Profile menu (top bar) -> confirm [%PROFILE_NAME%] is active (select it if not)
+3. Scene Collection menu (top bar) -> confirm [%SCENE_NAME%] is active (select it if not)
+4. Sources panel -> right-click [Windows Screen Capture] -> Resize output (Source size) if needed
+5. Go to Tools -> Scripts -> verify keylogging_trigger.py is listed
+6. Go to Python Settings tab -> verify path is: %PYTHON_INSTALL_DIR%
+
+Script Locations:
+- Main script:  %SCRIPTS_DIR%\keylogging_trigger.py
+- Keylogging:   %SCRIPTS_DIR%\keylogging.py
+- Patch:        %SCRIPTS_DIR%\patch_trigger.py
+
+Happy Recording!
+'@ | Set-Content -Encoding UTF8 '%SCRIPTS_DIR%\README.txt'"
+echo [SUCCESS] README.txt created
+
+REM ── 9. Run patch_trigger.py ───────────────────────────────────
+echo.
+echo ========================================================================
+echo  Running patch_trigger.py
+echo ========================================================================
+if exist "%SCRIPTS_DIR%\patch_trigger.py" (
+    echo [INFO] Executing patch_trigger.py...
+    "%PYTHON_EXECUTABLE%" "%SCRIPTS_DIR%\patch_trigger.py"
+    echo [SUCCESS] patch_trigger.py executed
+) else (
+    echo [WARNING] patch_trigger.py not found, skipping
+)
+
 REM ── Cleanup ───────────────────────────────────────────────────
 if exist "%TEMP_DIR%" rmdir /s /q "%TEMP_DIR%" 2>nul
 
 REM ── Done ──────────────────────────────────────────────────────
-powershell -NoProfile -Command "Write-Host ''; Write-Host '  ================================================' -ForegroundColor DarkCyan; Write-Host '  Setup Complete!' -ForegroundColor White; Write-Host '  ================================================' -ForegroundColor DarkCyan; Write-Host ''; Write-Host '    [+] Python 3.10 installed' -ForegroundColor Green; Write-Host '    [+] OBS Studio installed' -ForegroundColor Green; Write-Host '    [+] Python scripts downloaded' -ForegroundColor Green; Write-Host '    [+] Python path configured in OBS' -ForegroundColor Green; Write-Host '    [+] Profile (basic.ini) deployed' -ForegroundColor Green; Write-Host '    [+] Scene collection (%SCENE_NAME%.json) deployed' -ForegroundColor Green; Write-Host '    [+] keylogging_trigger.py registered in OBS Scripts' -ForegroundColor Green; Write-Host ''; Write-Host '  Next steps:' -ForegroundColor White; Write-Host '    1. Open OBS from Start Menu' -ForegroundColor Cyan; Write-Host '    2. Profile menu (top bar) -> confirm [%PROFILE_NAME%] is active (select it if not)' -ForegroundColor Cyan; Write-Host '    3. Scene Collection menu (top bar) -> confirm [%SCENE_NAME%] is active (select it if not)' -ForegroundColor Cyan; Write-Host '    4. Sources panel -> right-click [Windows Screen Capture] -> Resize output (Source size) if needed' -ForegroundColor Cyan; Write-Host '    5. Go to Tools -> Scripts -> verify keylogging_trigger.py is listed' -ForegroundColor Cyan; Write-Host '    6. Go to Python Settings tab -> verify path is: %PYTHON_INSTALL_DIR%' -ForegroundColor Cyan; Write-Host ''"
+powershell -NoProfile -Command "Write-Host ''; Write-Host '  ================================================' -ForegroundColor DarkCyan; Write-Host '  Setup Complete!' -ForegroundColor White; Write-Host '  ================================================' -ForegroundColor DarkCyan; Write-Host ''; Write-Host '    [+] Python 3.10 installed' -ForegroundColor Green; Write-Host '    [+] OBS Studio installed' -ForegroundColor Green; Write-Host '    [+] Python scripts downloaded' -ForegroundColor Green; Write-Host '    [+] pynput installed and verified' -ForegroundColor Green; Write-Host '    [+] Python path configured in OBS' -ForegroundColor Green; Write-Host '    [+] Profile (basic.ini) deployed' -ForegroundColor Green; Write-Host '    [+] Scene collection (%SCENE_NAME%.json) deployed' -ForegroundColor Green; Write-Host '    [+] keylogging_trigger.py registered in OBS Scripts' -ForegroundColor Green; Write-Host '    [+] patch_trigger.py downloaded and executed' -ForegroundColor Green; Write-Host '    [+] README.txt created' -ForegroundColor Green; Write-Host ''; Write-Host '  Next steps:' -ForegroundColor White; Write-Host '    1. Open OBS from Start Menu' -ForegroundColor Cyan; Write-Host '    2. Profile menu (top bar) -> confirm [%PROFILE_NAME%] is active (select it if not)' -ForegroundColor Cyan; Write-Host '    3. Scene Collection menu (top bar) -> confirm [%SCENE_NAME%] is active (select it if not)' -ForegroundColor Cyan; Write-Host '    4. Sources panel -> right-click [Windows Screen Capture] -> Resize output (Source size) if needed' -ForegroundColor Cyan; Write-Host '    5. Go to Tools -> Scripts -> verify keylogging_trigger.py is listed' -ForegroundColor Cyan; Write-Host '    6. Go to Python Settings tab -> verify path is: %PYTHON_INSTALL_DIR%' -ForegroundColor Cyan; Write-Host ''"
 echo.
 pause
 exit /b 0
