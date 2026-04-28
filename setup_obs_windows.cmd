@@ -223,35 +223,33 @@ echo.
 echo ========================================================================
 echo  Creating README
 echo ========================================================================
-powershell -Command "@'
-OBS + Python 3.10 Setup Completed!
-===================================
-
-Installation Summary:
-- Python 3.10 installed at: %PYTHON_INSTALL_DIR%
-- OBS Studio installed at: %OBS_INSTALL_DIR%
-- Python scripts downloaded to: %SCRIPTS_DIR%
-- pynput installed and verified
-- keylogging_trigger.py registered in OBS Scripts
-- Profile (basic.ini) deployed to: %OBS_CONFIG_DIR%\basic\profiles\%PROFILE_NAME%
-- Scene collection (%SCENE_NAME%.json) deployed to: %OBS_CONFIG_DIR%\basic\scenes
-
-Next Steps:
------------
-1. Open OBS from Start Menu
-2. Profile menu (top bar) -> confirm [%PROFILE_NAME%] is active (select it if not)
-3. Scene Collection menu (top bar) -> confirm [%SCENE_NAME%] is active (select it if not)
-4. Sources panel -> right-click [Windows Screen Capture] -> Resize output (Source size) if needed
-5. Go to Tools -> Scripts -> verify keylogging_trigger.py is listed
-6. Go to Python Settings tab -> verify path is: %PYTHON_INSTALL_DIR%
-
-Script Locations:
-- Main script:  %SCRIPTS_DIR%\keylogging_trigger.py
-- Keylogging:   %SCRIPTS_DIR%\keylogging.py
-- Patch:        %SCRIPTS_DIR%\patch_trigger.py
-
-Happy Recording!
-'@ | Set-Content -Encoding UTF8 '%SCRIPTS_DIR%\README.txt'"
+echo OBS + Python 3.10 Setup Completed!                          > "%SCRIPTS_DIR%\README.txt"
+echo ===================================                         >> "%SCRIPTS_DIR%\README.txt"
+echo.                                                            >> "%SCRIPTS_DIR%\README.txt"
+echo Installation Summary:                                       >> "%SCRIPTS_DIR%\README.txt"
+echo - Python 3.10 installed at: %PYTHON_INSTALL_DIR%           >> "%SCRIPTS_DIR%\README.txt"
+echo - OBS Studio installed at: %OBS_INSTALL_DIR%               >> "%SCRIPTS_DIR%\README.txt"
+echo - Python scripts downloaded to: %SCRIPTS_DIR%              >> "%SCRIPTS_DIR%\README.txt"
+echo - pynput installed and verified                             >> "%SCRIPTS_DIR%\README.txt"
+echo - keylogging_trigger.py registered in OBS Scripts          >> "%SCRIPTS_DIR%\README.txt"
+echo - Profile deployed to: %OBS_CONFIG_DIR%\basic\profiles\%PROFILE_NAME% >> "%SCRIPTS_DIR%\README.txt"
+echo - Scene collection deployed to: %OBS_CONFIG_DIR%\basic\scenes >> "%SCRIPTS_DIR%\README.txt"
+echo.                                                            >> "%SCRIPTS_DIR%\README.txt"
+echo Next Steps:                                                 >> "%SCRIPTS_DIR%\README.txt"
+echo -----------                                                 >> "%SCRIPTS_DIR%\README.txt"
+echo 1. Open OBS from Start Menu                                 >> "%SCRIPTS_DIR%\README.txt"
+echo 2. Profile menu -^> confirm [%PROFILE_NAME%] is active     >> "%SCRIPTS_DIR%\README.txt"
+echo 3. Scene Collection menu -^> confirm [%SCENE_NAME%] is active >> "%SCRIPTS_DIR%\README.txt"
+echo 4. Sources panel -^> right-click [Windows Screen Capture] -^> Resize output >> "%SCRIPTS_DIR%\README.txt"
+echo 5. Tools -^> Scripts -^> verify keylogging_trigger.py is listed >> "%SCRIPTS_DIR%\README.txt"
+echo 6. Python Settings tab -^> verify path is: %PYTHON_INSTALL_DIR% >> "%SCRIPTS_DIR%\README.txt"
+echo.                                                            >> "%SCRIPTS_DIR%\README.txt"
+echo Script Locations:                                           >> "%SCRIPTS_DIR%\README.txt"
+echo - Main script:  %SCRIPTS_DIR%\keylogging_trigger.py        >> "%SCRIPTS_DIR%\README.txt"
+echo - Keylogging:   %SCRIPTS_DIR%\keylogging.py                >> "%SCRIPTS_DIR%\README.txt"
+echo - Patch:        %SCRIPTS_DIR%\patch_trigger.py             >> "%SCRIPTS_DIR%\README.txt"
+echo.                                                            >> "%SCRIPTS_DIR%\README.txt"
+echo Happy Recording!                                            >> "%SCRIPTS_DIR%\README.txt"
 echo [SUCCESS] README.txt created
 
 REM ── 9. Run patch_trigger.py ───────────────────────────────────
