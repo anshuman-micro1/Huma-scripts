@@ -3,7 +3,7 @@
 Run this once to fix "Path detection failed. Cannot start keylogger."
 
 Usage:
-  /Library/Frameworks/Python.framework/Versions/3.10/bin/python3.10 ~/Downloads/patch_trigger.py
+  /Library/Frameworks/Python.framework/Versions/3.10/bin/python3.10 ~/Documents/patch_trigger.py
 """
 import re, sys, os, platform
 

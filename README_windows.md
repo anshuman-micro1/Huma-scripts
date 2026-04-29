@@ -38,7 +38,7 @@
    - Right-click → **Run as administrator**
 3. Run the script:
    ```
-   cmd /k C:\Users\YourName\Downloads\setup_obs_windows.cmd
+   cmd /k C:\Users\YourName\Documents\setup_obs_windows.cmd
    ```
    Or simply right-click the file in File Explorer and select **Run as administrator**
 
@@ -58,7 +58,7 @@
 4. Verify the script is registered:
    - Go to **Tools → Scripts → Scripts tab**
    - `keylogging_trigger.py` should appear in the Loaded Scripts list
-   - If not, click `+` and navigate to `%USERPROFILE%\Downloads\OBS_Scripts\keylogging_trigger.py`
+   - If not, click `+` and navigate to `%USERPROFILE%\Documents\OBS_Scripts\keylogging_trigger.py`
 5. Verify the Python path:
    - Go to **Tools → Scripts → Python Settings tab**
    - The path should be set to: `%LOCALAPPDATA%\Programs\Python\Python310`
@@ -73,8 +73,8 @@
 |---|---|
 | Python | `%LOCALAPPDATA%\Programs\Python\Python310` |
 | OBS Studio | `%ProgramFiles%\obs-studio` |
-| keylogging_trigger.py | `%USERPROFILE%\Downloads\OBS_Scripts\keylogging_trigger.py` |
-| keylogging.py | `%USERPROFILE%\Downloads\OBS_Scripts\keylogging.py` |
+| keylogging_trigger.py | `%USERPROFILE%\Documents\OBS_Scripts\keylogging_trigger.py` |
+| keylogging.py | `%USERPROFILE%\Documents\OBS_Scripts\keylogging.py` |
 | OBS Profile | `%APPDATA%\obs-studio\basic\profiles\Untitled\basic.ini` |
 | Scene Collection | `%APPDATA%\obs-studio\basic\scenes\Untitled.json` |
 | OBS Global Config | `%APPDATA%\obs-studio\global.ini` |
@@ -135,7 +135,7 @@ Follow these steps in order:
    ```powershell
    Remove-Item -Recurse -Force "$env:ProgramFiles\obs-studio" -ErrorAction SilentlyContinue
    Remove-Item -Recurse -Force "$env:APPDATA\obs-studio" -ErrorAction SilentlyContinue
-   Remove-Item -Recurse -Force "$env:USERPROFILE\Downloads\OBS_Scripts" -ErrorAction SilentlyContinue
+   Remove-Item -Recurse -Force "$env:USERPROFILE\Documents\OBS_Scripts" -ErrorAction SilentlyContinue
    Remove-Item -Recurse -Force "$env:LOCALAPPDATA\Programs\Python\Python310" -ErrorAction SilentlyContinue
    ```
 
