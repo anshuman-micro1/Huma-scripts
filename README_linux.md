@@ -56,7 +56,7 @@
 4. Verify the script is registered:
    - Go to **Tools → Scripts → Scripts tab**.
    - `keylogging_trigger.py` should appear in the Loaded Scripts list.
-   - If not, click `+` and navigate to `~/Downloads/OBS_Scripts/keylogging_trigger.py`.
+   - If not, click `+` and navigate to `~/Documents/OBS_Scripts/keylogging_trigger.py`.
 5. Restart OBS if the script or scene collection does not appear correctly.
 
 ---
@@ -66,7 +66,7 @@
 | Item | Location |
 |---|---|
 | OBS Config Directory | `~/.config/obs-studio/` |
-| Python Scripts | `~/Downloads/OBS_Scripts/` |
+| Python Scripts | `~/Documents/OBS_Scripts/` |
 | OBS Profile | `~/.config/obs-studio/basic/profiles/HUMA/basic.ini` |
 | Scene Collection | `~/.config/obs-studio/basic/scenes/HUMA.json` |
 

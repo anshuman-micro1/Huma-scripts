@@ -3,11 +3,11 @@
 Run this once to fix "Path detection failed. Cannot start keylogger."
 
 Usage:
-  /Library/Frameworks/Python.framework/Versions/3.10/bin/python3.10 ~/Downloads/patch_trigger.py
+  /Library/Frameworks/Python.framework/Versions/3.10/bin/python3.10 ~/Documents/patch_trigger.py
 """
 import re, sys, os, platform
 
-SCRIPTS_DIR = os.path.expanduser("~/Downloads/OBS_Scripts")
+SCRIPTS_DIR = os.path.expanduser("~/Documents/OBS_Scripts")
 TRIGGER     = os.path.join(SCRIPTS_DIR, "keylogging_trigger.py")
 KEYLOGGER   = os.path.join(SCRIPTS_DIR, "keylogging.py")
 

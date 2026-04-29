@@ -36,12 +36,12 @@
 2. Open **Terminal** (Applications → Utilities → Terminal)
 3. Make the script executable and run it:
    ```zsh
-   chmod +x ~/Downloads/setup_obs_mac.sh
-   ~/Downloads/setup_obs_mac.sh
+   chmod +x ~/Documents/setup_obs_mac.sh
+   ~/Documents/setup_obs_mac.sh
    ```
    Or run it directly without changing permissions:
    ```zsh
-   zsh ~/Downloads/setup_obs_mac.sh
+   zsh ~/Documents/setup_obs_mac.sh
    ```
 4. Enter your macOS password when prompted — this is required to install Python and OBS
 
@@ -73,7 +73,7 @@ zsh setup_obs_mac.sh \
 4. Verify the script is registered:
    - Go to **Tools → Scripts → Scripts tab**
    - `keylogging_trigger.py` should appear in the Loaded Scripts list
-   - If not, click `+` and navigate to `~/Downloads/OBS_Scripts/keylogging_trigger.py`
+   - If not, click `+` and navigate to `~/Documents/OBS_Scripts/keylogging_trigger.py`
 5. Verify the Python path:
    - Go to **Tools → Scripts → Python Settings tab**
    - The path should be set to: `/Library/Frameworks/Python.framework/Versions/3.10`
@@ -89,8 +89,8 @@ zsh setup_obs_mac.sh \
 | Python | `/Library/Frameworks/Python.framework/Versions/3.10` |
 | Python Executable | `/Library/Frameworks/Python.framework/Versions/3.10/bin/python3.10` |
 | OBS Studio | `/Applications/OBS.app` |
-| keylogging_trigger.py | `~/Downloads/OBS_Scripts/keylogging_trigger.py` |
-| keylogging.py | `~/Downloads/OBS_Scripts/keylogging.py` |
+| keylogging_trigger.py | `~/Documents/OBS_Scripts/keylogging_trigger.py` |
+| keylogging.py | `~/Documents/OBS_Scripts/keylogging.py` |
 | OBS Profile | `~/Library/Application Support/obs-studio/basic/profiles/Untitled/basic.ini` |
 | Scene Collection | `~/Library/Application Support/obs-studio/basic/scenes/Untitled.json` |
 | OBS Global Config | `~/Library/Application Support/obs-studio/global.ini` |
@@ -168,7 +168,7 @@ Follow these steps in order:
 3. **Remove leftover files** by running the following in Terminal:
    ```bash
    rm -rf "$HOME/Library/Application Support/obs-studio"
-   rm -rf "$HOME/Downloads/OBS_Scripts"
+   rm -rf "$HOME/Documents/OBS_Scripts"
    ```
 
 4. Re-run `setup_obs_mac.sh`
