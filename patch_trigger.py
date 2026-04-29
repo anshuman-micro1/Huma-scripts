@@ -7,7 +7,7 @@ Usage:
 """
 import re, sys, os, platform
 
-SCRIPTS_DIR = os.path.expanduser("~/Downloads/OBS_Scripts")
+SCRIPTS_DIR = os.path.expanduser("~/Documents/OBS_Scripts")
 TRIGGER     = os.path.join(SCRIPTS_DIR, "keylogging_trigger.py")
 KEYLOGGER   = os.path.join(SCRIPTS_DIR, "keylogging.py")
 
