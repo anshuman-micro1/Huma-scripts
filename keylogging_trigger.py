@@ -287,7 +287,15 @@ def _stop_keylogger() -> None:
     )
 
     try:
-        _proc.terminate()
+        # Send SIGTERM to the keylogger's own process group
+        # (it runs in start_new_session=True so it has its own pgid)
+        if os.name != "nt":
+            try:
+                os.killpg(os.getpgid(_proc.pid), 15)  # SIGTERM
+            except (ProcessLookupError, PermissionError):
+                _proc.terminate()
+        else:
+            _proc.terminate()
         _proc.wait(timeout=3)
     except Exception:
         try:
@@ -307,8 +315,16 @@ def _stop_keylogger() -> None:
 
 def _start_keylogger() -> None:
     global _proc, _log_fp, _current_jsonl_path
+
+    # Guard: if process is already alive, skip
     if _proc is not None:
-        return
+        if _proc.poll() is None:
+            _log(obs.LOG_INFO, "Keylogger already running (pid={}).".format(_proc.pid))
+            return
+        else:
+            # Previous process ended unexpectedly; clean up
+            _log(obs.LOG_WARNING, "Previous keylogger process exited (rc={}). Restarting.".format(_proc.returncode))
+            _proc = None
 
     base = _recording_base_path()
     if not base:
@@ -344,7 +360,15 @@ def _start_keylogger() -> None:
     try:
         _log_fp = open(log_path, "a", encoding="utf-8")
         _log(obs.LOG_INFO, f"Starting keylogger: {' '.join(shlex.quote(c) for c in cmd)}")
-        _proc = subprocess.Popen(cmd, stdout=_log_fp, stderr=subprocess.STDOUT)
+
+        # start_new_session=True puts the keylogger in its own process group
+        # so OBS's internal signal handling won't accidentally SIGTERM it
+        popen_kwargs = dict(stdout=_log_fp, stderr=subprocess.STDOUT)
+        if os.name != "nt":
+            popen_kwargs["start_new_session"] = True
+
+        _proc = subprocess.Popen(cmd, **popen_kwargs)
+        _log(obs.LOG_INFO, f"Keylogger started (pid={_proc.pid}, new_session=True)")
     except Exception as exc:
         _log(obs.LOG_ERROR, f"Failed to start keylogging: {exc}")
         _proc = None
