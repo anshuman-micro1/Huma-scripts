@@ -18,6 +18,7 @@ import subprocess
 import sys
 import time
 import json
+import traceback
 
 import obspython as obs
 
@@ -279,6 +280,10 @@ def _stop_keylogger() -> None:
     if _proc is None:
         return
 
+    # Log who is calling _stop_keylogger for debugging
+    caller_stack = ''.join(traceback.format_stack(limit=4))
+    _log(obs.LOG_WARNING, f"_stop_keylogger called! Caller stack:\n{caller_stack}")
+
     # Write recording_stop anchor event before terminating
     ts_wall = time.time()
     ts_mono = time.monotonic()
@@ -389,13 +394,17 @@ def _start_keylogger() -> None:
 
 
 def _on_event(event) -> None:
+    _log(obs.LOG_INFO, f"_on_event received: {event}")
     if event == obs.OBS_FRONTEND_EVENT_RECORDING_STARTED:
+        _log(obs.LOG_INFO, "Event: RECORDING_STARTED")
         _start_keylogger()
         _flash_on()
     elif event == obs.OBS_FRONTEND_EVENT_RECORDING_STOPPING:
+        _log(obs.LOG_INFO, "Event: RECORDING_STOPPING")
         _flash_off()
         _stop_keylogger()
     elif event == obs.OBS_FRONTEND_EVENT_RECORDING_STOPPED:
+        _log(obs.LOG_INFO, "Event: RECORDING_STOPPED")
         _stop_keylogger()
 
 
@@ -434,11 +443,13 @@ def script_update(settings):
 
 
 def script_load(settings):
+    _log(obs.LOG_INFO, ">>> script_load() called — registering event callback")
     obs.obs_frontend_add_event_callback(_on_event)
     _ensure_flash_hidden()
 
 
 def script_unload():
+    _log(obs.LOG_WARNING, ">>> script_unload() called — will stop keylogger if running")
     obs.timer_remove(_flash_off)
     _ensure_flash_hidden()
     _stop_keylogger()

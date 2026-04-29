@@ -537,23 +537,27 @@ JSONEOF
 }
 
 configure_obs_scripts() {
-    print_header "Registering keylogging_trigger.py in OBS Scripts"
+    print_header "Verifying OBS Script Registration"
 
     OBS_CONFIG_DIR="$HOME/Library/Application Support/obs-studio"
     OBS_PROFILES_DIR="${OBS_CONFIG_DIR}/basic/profiles"
     SCRIPT_PATH="${SCRIPTS_DIR}/keylogging_trigger.py"
 
-    # Write top-level scripts.json (force overwrite)
+    # -------------------------------------------------------------------------
+    # NOTE: We intentionally do NOT write scripts.json here.
+    # The script is already registered in the scene collection (HUMA.json)
+    # via modules.scripts-tool. Writing scripts.json ALSO registers it,
+    # causing OBS to load the script twice. On reload, OBS calls
+    # script_unload() which kills the keylogger subprocess immediately.
+    # -------------------------------------------------------------------------
+
+    # Remove any stale scripts.json that could cause double-loading
     SCRIPTS_JSON="${OBS_CONFIG_DIR}/scripts.json"
-    print_info "Writing top-level scripts.json..."
-    cat > "$SCRIPTS_JSON" << EOF
-[
-    {
-        "path": "${SCRIPT_PATH}"
-    }
-]
-EOF
-    print_success "Written: ${SCRIPTS_JSON}"
+    if [ -f "$SCRIPTS_JSON" ]; then
+        print_info "Removing stale top-level scripts.json to prevent double-loading..."
+        rm -f "$SCRIPTS_JSON"
+        print_success "Removed: ${SCRIPTS_JSON}"
+    fi
 
     # If no profiles exist yet, create the HUMA profile OBS uses on first launch
     if [ ! -d "$OBS_PROFILES_DIR" ]; then
@@ -561,18 +565,14 @@ EOF
         mkdir -p "${OBS_PROFILES_DIR}/HUMA"
     fi
 
-    # Force overwrite scripts.json in every profile
+    # Remove any stale profile-level scripts.json
     for PROFILE_DIR in "${OBS_PROFILES_DIR}"/*/; do
         PROFILE_SCRIPTS_JSON="${PROFILE_DIR}scripts.json"
-        print_info "Force writing scripts.json for profile: $(basename "$PROFILE_DIR")..."
-        cat > "$PROFILE_SCRIPTS_JSON" << EOF
-[
-    {
-        "path": "${SCRIPT_PATH}"
-    }
-]
-EOF
-        print_success "Written: ${PROFILE_SCRIPTS_JSON}"
+        if [ -f "$PROFILE_SCRIPTS_JSON" ]; then
+            print_info "Removing stale scripts.json from profile: $(basename "$PROFILE_DIR")..."
+            rm -f "$PROFILE_SCRIPTS_JSON"
+            print_success "Removed: ${PROFILE_SCRIPTS_JSON}"
+        fi
     done
 
     # Also create scenes dir just in case OBS needs it on first launch
@@ -589,11 +589,7 @@ EOF
         exit 1
     fi
 
-    print_info "Final scripts.json contents:"
-    for PROFILE_DIR in "${OBS_PROFILES_DIR}"/*/; do
-        echo "  Profile: $(basename "$PROFILE_DIR")"
-        cat "${PROFILE_DIR}scripts.json"
-    done
+    print_info "Script is registered via scene collection (${SCENE_COLLECTION_NAME}.json → modules.scripts-tool)"
 }
 
 create_readme() {
