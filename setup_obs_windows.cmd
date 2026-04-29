@@ -200,7 +200,26 @@ set "KEYLOG_FWD=%SCRIPTS_DIR:\=/%/keylogging.py"
 set "SCENE_JSON=%OBS_CONFIG_DIR%\basic\scenes\%SCENE_NAME%.json"
 
 set "PYTHON_EXE_FWD=%PYTHON_EXECUTABLE:\=/%"
-powershell -Command "$t = '%TRIGGER_FWD%'; $k = '%KEYLOG_FWD%'; $p = '%PYTHON_EXE_FWD%'; $json = '{\"current_scene\":\"Scene\",\"current_program_scene\":\"Scene\",\"scene_order\":[{\"name\":\"Scene\"}],\"name\":\"%SCENE_NAME%\",\"sources\":[{\"name\":\"Scene\",\"uuid\":\"e7611cc3-a513-4a5c-ba7c-1bf43add1ffe\",\"id\":\"scene\",\"versioned_id\":\"scene\",\"settings\":{\"items\":[{\"name\":\"Windows Audio Capture\",\"source_uuid\":\"97bcb000-b352-4314-8e3d-3cf4b23719d2\",\"visible\":true,\"locked\":false,\"rot\":0.0,\"pos\":{\"x\":0.0,\"y\":0.0},\"scale\":{\"x\":1.0,\"y\":1.0}},{\"name\":\"SYNC_FLASH\",\"source_uuid\":\"209c5bff-0eed-4957-b603-6b4050d857f2\",\"visible\":true,\"locked\":true,\"rot\":0.0,\"pos\":{\"x\":0.0,\"y\":0.0},\"scale\":{\"x\":1.0,\"y\":1.0},\"bounds_type\":0,\"bounds\":{\"x\":0.0,\"y\":0.0}},{\"name\":\"Windows Screen Capture\",\"source_uuid\":\"6cc342d4-8b80-49d6-b520-3b23bfadead2\",\"visible\":true,\"locked\":false,\"rot\":0.0,\"pos\":{\"x\":0.0,\"y\":0.0},\"scale\":{\"x\":1.0,\"y\":1.0},\"bounds_type\":2,\"bounds\":{\"x\":1920.0,\"y\":1080.0}}]},\"mixers\":0,\"volume\":1.0,\"enabled\":true,\"muted\":false},{\"name\":\"SYNC_FLASH\",\"uuid\":\"209c5bff-0eed-4957-b603-6b4050d857f2\",\"id\":\"color_source\",\"versioned_id\":\"color_source_v3\",\"settings\":{\"color\":4294967295},\"volume\":1.0,\"enabled\":true,\"muted\":false},{\"name\":\"Windows Screen Capture\",\"uuid\":\"6cc342d4-8b80-49d6-b520-3b23bfadead2\",\"id\":\"monitor_capture\",\"versioned_id\":\"monitor_capture\",\"settings\":{\"monitor\":0,\"method\":1,\"monitor_id\":\"default\"},\"volume\":1.0,\"enabled\":true,\"muted\":false},{\"name\":\"Windows Audio Capture\",\"uuid\":\"97bcb000-b352-4314-8e3d-3cf4b23719d2\",\"id\":\"wasapi_output_capture\",\"versioned_id\":\"wasapi_output_capture\",\"settings\":{},\"volume\":1.0,\"enabled\":true,\"muted\":false}],\"groups\":[],\"transitions\":[],\"current_transition\":\"Fade\",\"transition_duration\":300,\"modules\":{\"scripts-tool\":[{\"path\":\"TRIGGER_PLACEHOLDER\",\"settings\":{\"keylogger_script\":\"KEYLOG_PLACEHOLDER\",\"python_exe\":\"PYTHON_EXE_PLACEHOLDER\"}}]}}'; $json = $json -replace 'TRIGGER_PLACEHOLDER', $t -replace 'KEYLOG_PLACEHOLDER', $k -replace 'PYTHON_EXE_PLACEHOLDER', $p; $json | Set-Content -Encoding UTF8 '%SCENE_JSON%'"
+set "SCENE_JSON_FWD=%SCENE_JSON:\=/%"
+set "PY_SCRIPT=%TEMP%\gen_scene.py"
+(
+echo import json, ctypes
+echo from ctypes import wintypes
+echo monitor_id = ''
+echo u = ctypes.windll.user32
+echo class D(ctypes.Structure^):
+echo     _fields_ = [('cb', wintypes.DWORD^), ('DeviceName', wintypes.WCHAR*32^), ('DeviceString', wintypes.WCHAR*128^), ('StateFlags', wintypes.DWORD^), ('DeviceID', wintypes.WCHAR*128^), ('DeviceKey', wintypes.WCHAR*128^)]
+echo a = D(^)
+echo a.cb = ctypes.sizeof(D^)
+echo m = D(^)
+echo m.cb = ctypes.sizeof(D^)
+echo if u.EnumDisplayDevicesW(None, 0, ctypes.byref(a^), 0^):
+echo     if u.EnumDisplayDevicesW(a.DeviceName, 0, ctypes.byref(m^), 1^):
+echo         monitor_id = m.DeviceID
+echo j = {'current_scene': 'Scene', 'current_program_scene': 'Scene', 'scene_order': [{'name': 'Scene'}], 'name': r'%SCENE_NAME%', 'sources': [{'name': 'Scene', 'uuid': 'e7611cc3-a513-4a5c-ba7c-1bf43add1ffe', 'id': 'scene', 'versioned_id': 'scene', 'settings': {'items': [{'name': 'Windows Audio Capture', 'source_uuid': '97bcb000-b352-4314-8e3d-3cf4b23719d2', 'visible': True, 'locked': False, 'rot': 0.0, 'pos': {'x': 0.0, 'y': 0.0}, 'scale': {'x': 1.0, 'y': 1.0}, 'bounds_type': 0, 'bounds': {'x': 0.0, 'y': 0.0}}, {'name': 'SYNC_FLASH', 'source_uuid': '209c5bff-0eed-4957-b603-6b4050d857f2', 'visible': True, 'locked': True, 'rot': 0.0, 'pos': {'x': 0.0, 'y': 0.0}, 'scale': {'x': 1.0, 'y': 1.0}, 'bounds_type': 0, 'bounds': {'x': 0.0, 'y': 0.0}}, {'name': 'Windows Screen Capture', 'source_uuid': '6cc342d4-8b80-49d6-b520-3b23bfadead2', 'visible': True, 'locked': False, 'rot': 0.0, 'pos': {'x': 0.0, 'y': 0.0}, 'scale': {'x': 1.0, 'y': 1.0}, 'bounds_type': 2, 'bounds': {'x': 1920.0, 'y': 1080.0}}]}, 'mixers': 0, 'volume': 1.0, 'enabled': True, 'muted': False}, {'name': 'SYNC_FLASH', 'uuid': '209c5bff-0eed-4957-b603-6b4050d857f2', 'id': 'color_source', 'versioned_id': 'color_source_v3', 'settings': {'color': 4294967295}, 'volume': 1.0, 'enabled': True, 'muted': False}, {'name': 'Windows Screen Capture', 'uuid': '6cc342d4-8b80-49d6-b520-3b23bfadead2', 'id': 'monitor_capture', 'versioned_id': 'monitor_capture', 'settings': {'monitor': 0, 'method': 1, 'monitor_id': monitor_id}, 'volume': 1.0, 'enabled': True, 'muted': False}, {'name': 'Windows Audio Capture', 'uuid': '97bcb000-b352-4314-8e3d-3cf4b23719d2', 'id': 'wasapi_output_capture', 'versioned_id': 'wasapi_output_capture', 'settings': {}, 'volume': 1.0, 'enabled': True, 'muted': False}], 'groups': [], 'transitions': [], 'current_transition': 'Fade', 'transition_duration': 300, 'modules': {'scripts-tool': [{'path': r'%TRIGGER_FWD%', 'settings': {'keylogger_script': r'%KEYLOG_FWD%', 'python_exe': r'%PYTHON_EXE_FWD%'}}]}}
+echo with open(r'%SCENE_JSON_FWD%', 'w', encoding='utf-8'^) as f: f.write(json.dumps(j^)^)
+) > "%PY_SCRIPT%"
+"%PYTHON_EXECUTABLE%" "%PY_SCRIPT%"
 
 if not exist "%SCENE_JSON%" (
     echo [ERROR] Failed to write scene collection
