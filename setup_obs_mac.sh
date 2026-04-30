@@ -460,32 +460,20 @@ deploy_obs_profile() {
         'FPSDen=1' \
         > "$PROFILE_INI"
 
-    # Detect display resolution
-    RESOLUTION_LINE=$(system_profiler SPDisplaysDataType 2>/dev/null | grep -i "Resolution:" | head -1)
+    # Detect and apply native display resolution automatically.
+    RESOLUTION_LINE=$(system_profiler SPDisplaysDataType 2>/dev/null | awk '/Resolution:/ {print; exit}')
     SCREEN_W=$(echo "$RESOLUTION_LINE" | grep -oE '[0-9]+' | sed -n '1p')
     SCREEN_H=$(echo "$RESOLUTION_LINE" | grep -oE '[0-9]+' | sed -n '2p')
-    if [ -n "$SCREEN_W" ] && [ -n "$SCREEN_H" ] && [ "$SCREEN_W" -ge 1920 ] && [ "$SCREEN_H" -ge 1080 ]; then
-        CANVAS_W=1920
-        CANVAS_H=1080
-    else
-        CANVAS_W=${SCREEN_W:-2880}
-        CANVAS_H=${SCREEN_H:-1800}
-    fi
-    
-    printf "  ${YELLOW}?${NC} Do you want to force the OBS canvas and output resolution to ${CANVAS_W}x${CANVAS_H}? (y/n): "
-    read -r FORCE_RES < /dev/tty
+    CANVAS_W=${SCREEN_W:-1920}
+    CANVAS_H=${SCREEN_H:-1080}
 
-    if [[ "$FORCE_RES" =~ ^[Yy]$ ]]; then
-        sed -i '' \
-            -e "s/^BaseCX=.*/BaseCX=${CANVAS_W}/" \
-            -e "s/^BaseCY=.*/BaseCY=${CANVAS_H}/" \
-            -e "s/^OutputCX=.*/OutputCX=${CANVAS_W}/" \
-            -e "s/^OutputCY=.*/OutputCY=${CANVAS_H}/" \
-            "$PROFILE_INI"
-        print_info "Canvas resolution forced to: ${CANVAS_W}x${CANVAS_H}"
-    else
-        print_info "Keeping default OBS resolution settings."
-    fi
+    sed -i '' \
+        -e "s/^BaseCX=.*/BaseCX=${CANVAS_W}/" \
+        -e "s/^BaseCY=.*/BaseCY=${CANVAS_H}/" \
+        -e "s/^OutputCX=.*/OutputCX=${CANVAS_W}/" \
+        -e "s/^OutputCY=.*/OutputCY=${CANVAS_H}/" \
+        "$PROFILE_INI"
+    print_info "Canvas/output resolution set to native display: ${CANVAS_W}x${CANVAS_H}"
 
     # Still patch FPS to 30
     sed -i '' \
