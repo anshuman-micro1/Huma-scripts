@@ -29,9 +29,9 @@ NC=$'\033[0m'
 
 PYTHON_URL="https://www.python.org/ftp/python/3.10.11/python-3.10.11-macos11.pkg"
 if [ "$(uname -m)" = "arm64" ]; then
-    OBS_URL="https://github.com/obsproject/obs-studio/releases/download/30.2.2/obs-studio-30.2.2-macos-apple.dmg"
+    OBS_URL="https://github.com/obsproject/obs-studio/releases/download/30.2.2/OBS-Studio-30.2.2-macOS-Apple.dmg"
 else
-    OBS_URL="https://github.com/obsproject/obs-studio/releases/download/30.2.2/obs-studio-30.2.2-macos-x86_64.dmg"
+    OBS_URL="https://github.com/obsproject/obs-studio/releases/download/30.2.2/OBS-Studio-30.2.2-macOS-Intel.dmg"
 fi
 
 KEYLOGGING_TRIGGER_URL="https://raw.githubusercontent.com/anshuman-micro1/Huma-scripts/main/keylogging_trigger.py"
@@ -179,7 +179,7 @@ install_obs() {
 
     print_info "Downloading OBS Studio..."
     OBS_DMG="/tmp/obs-studio.dmg"
-    curl -L --progress-bar -o "$OBS_DMG" "$OBS_URL"
+    curl -L -f --progress-bar -o "$OBS_DMG" "$OBS_URL"
 
     if [ ! -f "$OBS_DMG" ]; then
         print_error "Failed to download OBS Studio"
