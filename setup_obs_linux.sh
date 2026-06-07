@@ -394,6 +394,7 @@ main() {
     print_info "Starting installation process..."
     
     print_info "Checking sudo access (you may be prompted for password)..."
+    print_info "Enter your Linux login password when prompted — this is normal and required."
     sudo -v || true
 
     install_dependencies
